@@ -10,9 +10,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Search, Plus, Edit, Shield, DollarSign, Star, Activity } from 'lucide-react';
+import { useRoles } from '@/hooks/useRoles';
+import { sanitizeInput, validation, authorize, rateLimiter } from '@/lib/security';
+import { Users, Search, Plus, Edit, Shield, DollarSign, Star, Activity, AlertTriangle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
 type User = Tables<'users'>;
 type Role = Tables<'roles'>;
@@ -22,25 +26,33 @@ interface UserWithRoles extends User {
 }
 
 export default function UsersPage() {
+  const { isAdmin, loading: rolesLoading, hasRole } = useRoles();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [rolesList, setRolesList] = useState<Role[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserWithRoles[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<UserWithRoles | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    fetchUsers();
-    fetchRoles();
-  }, []);
+    if (isAdmin) {
+      fetchUsers();
+      fetchRoles();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
+    // Sanitize search term to prevent XSS
+    const cleanSearchTerm = sanitizeInput.text(searchTerm);
+    
     let filtered = users.filter(user =>
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      user.full_name?.toLowerCase().includes(cleanSearchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(cleanSearchTerm.toLowerCase()) ||
+      user.name?.toLowerCase().includes(cleanSearchTerm.toLowerCase())
     );
 
     if (filterRole !== 'all') {
@@ -53,7 +65,18 @@ export default function UsersPage() {
   }, [users, searchTerm, filterRole]);
 
   const fetchUsers = async () => {
+    if (!isAdmin) {
+      toast.error('Unauthorized access');
+      return;
+    }
+
     try {
+      // Rate limit user fetching
+      if (!rateLimiter.isAllowed('fetch_users', 10, 60000)) {
+        toast.error('Too many requests. Please wait before trying again.');
+        return;
+      }
+
       const { data: usersData, error: usersError } = await supabase
         .from('users')
         .select('*')
@@ -61,35 +84,45 @@ export default function UsersPage() {
 
       if (usersError) throw usersError;
 
-      // Fetch roles for each user
+      // Fetch roles for each user using the secure function
       const usersWithRoles = await Promise.all(
         (usersData || []).map(async (user) => {
-          const { data: userRoles } = await supabase
-            .from('user_roles')
-            .select(`
-              roles (
-                name,
-                description
-              )
-            `)
-            .eq('user_id', user.id);
+          try {
+            const { data: userRoles, error } = await supabase.rpc('get_user_roles', {
+              target_user_id: user.id
+            });
 
-          return {
-            ...user,
-            roles: userRoles?.map(ur => ur.roles).filter(Boolean) || []
-          };
+            if (error) {
+              console.warn(`Could not fetch roles for user ${user.id}:`, error);
+              return { ...user, roles: [] };
+            }
+
+            return {
+              ...user,
+              roles: userRoles?.map(role => ({ 
+                name: role.role_name, 
+                description: role.role_description 
+              })) || []
+            };
+          } catch (err) {
+            console.warn(`Error fetching roles for user ${user.id}:`, err);
+            return { ...user, roles: [] };
+          }
         })
       );
 
       setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast.error('Failed to fetch users');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchRoles = async () => {
+    if (!isAdmin) return;
+
     try {
       const { data, error } = await supabase
         .from('roles')
@@ -97,39 +130,92 @@ export default function UsersPage() {
         .order('name');
 
       if (error) throw error;
-      setRoles(data || []);
+      setRolesList(data || []);
     } catch (error) {
       console.error('Error fetching roles:', error);
+      toast.error('Failed to fetch roles');
     }
   };
 
   const handleEditUser = (user: UserWithRoles) => {
+    if (!isAdmin) {
+      toast.error('Unauthorized action');
+      return;
+    }
     setEditingUser(user);
+    setValidationErrors({});
     setIsEditDialogOpen(true);
   };
 
+  const validateUserData = (user: UserWithRoles): Record<string, string> => {
+    const errors: Record<string, string> = {};
+
+    if (user.full_name) {
+      const nameError = validation.user.fullName(user.full_name);
+      if (nameError) errors.full_name = nameError;
+    }
+
+    if (user.user_type) {
+      const typeError = validation.user.userType(user.user_type);
+      if (typeError) errors.user_type = typeError;
+    }
+
+    return errors;
+  };
+
   const handleUpdateUser = async () => {
-    if (!editingUser) return;
+    if (!editingUser || !isAdmin) {
+      toast.error('Unauthorized action');
+      return;
+    }
+
+    // Rate limit updates
+    if (!rateLimiter.isAllowed(`update_user_${editingUser.id}`, 5, 60000)) {
+      toast.error('Too many update attempts. Please wait before trying again.');
+      return;
+    }
+
+    // Validate input
+    const errors = validateUserData(editingUser);
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setIsUpdating(true);
+    setValidationErrors({});
 
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({
-          full_name: editingUser.full_name,
-          name: editingUser.name,
-          is_verified: editingUser.is_verified,
-          is_active: editingUser.is_active,
-          user_type: editingUser.user_type
-        })
-        .eq('id', editingUser.id);
+      // Sanitize inputs
+      const sanitizedData = {
+        full_name: editingUser.full_name ? sanitizeInput.name(editingUser.full_name) : null,
+        name: editingUser.name ? sanitizeInput.name(editingUser.name) : null,
+        is_verified: editingUser.is_verified,
+        is_active: editingUser.is_active,
+        user_type: editingUser.user_type
+      };
+
+      // Use the secure function for updating
+      const { error } = await supabase.rpc('safe_update_user', {
+        target_user_id: editingUser.id,
+        full_name_param: sanitizedData.full_name,
+        name_param: sanitizedData.name,
+        is_verified_param: sanitizedData.is_verified,
+        is_active_param: sanitizedData.is_active,
+        user_type_param: sanitizedData.user_type
+      });
 
       if (error) throw error;
 
       setIsEditDialogOpen(false);
       setEditingUser(null);
+      toast.success('User updated successfully');
       fetchUsers();
     } catch (error) {
       console.error('Error updating user:', error);
+      toast.error('Failed to update user');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -137,6 +223,30 @@ export default function UsersPage() {
   const verifiedUsers = users.filter(u => u.is_verified).length;
   const activeUsers = users.filter(u => u.is_active).length;
   const totalWalletBalance = users.reduce((sum, user) => sum + Number(user.wallet_balance || 0), 0);
+
+  // Authorization check
+  if (!rolesLoading && !isAdmin) {
+    return (
+      <AdminLayout title="Access Denied" description="You don't have permission to access this page">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            You don't have administrative privileges to access this page.
+          </AlertDescription>
+        </Alert>
+      </AdminLayout>
+    );
+  }
+
+  if (rolesLoading || loading) {
+    return (
+      <AdminLayout title="Users Management" description="Loading...">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout title="Users Management" description="Manage platform users, roles, and permissions">
@@ -208,13 +318,13 @@ export default function UsersPage() {
                     className="pl-10"
                   />
                 </div>
-                <Select value={filterRole} onValueChange={setFilterRole}>
+                 <Select value={filterRole} onValueChange={setFilterRole}>
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by role" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Roles</SelectItem>
-                    {roles.map((role) => (
+                    {rolesList.map((role) => (
                       <SelectItem key={role.id} value={role.name}>
                         {role.name.charAt(0).toUpperCase() + role.name.slice(1)}
                       </SelectItem>
@@ -289,7 +399,11 @@ export default function UsersPage() {
                     id="fullName"
                     value={editingUser.full_name || ''}
                     onChange={(e) => setEditingUser({...editingUser, full_name: e.target.value})}
+                    className={validationErrors.full_name ? 'border-red-500' : ''}
                   />
+                  {validationErrors.full_name && (
+                    <p className="text-sm text-red-500 mt-1">{validationErrors.full_name}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="name">Display Name</Label>
@@ -301,8 +415,11 @@ export default function UsersPage() {
                 </div>
                 <div>
                   <Label htmlFor="userType">User Type</Label>
-                  <Select value={editingUser.user_type || 'customer'} onValueChange={(value) => setEditingUser({...editingUser, user_type: value})}>
-                    <SelectTrigger>
+                  <Select 
+                    value={editingUser.user_type || 'customer'} 
+                    onValueChange={(value) => setEditingUser({...editingUser, user_type: value})}
+                  >
+                    <SelectTrigger className={validationErrors.user_type ? 'border-red-500' : ''}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -312,6 +429,9 @@ export default function UsersPage() {
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
+                  {validationErrors.user_type && (
+                    <p className="text-sm text-red-500 mt-1">{validationErrors.user_type}</p>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -329,8 +449,12 @@ export default function UsersPage() {
                   />
                   <Label htmlFor="active">Active</Label>
                 </div>
-                <Button onClick={handleUpdateUser} className="w-full">
-                  Update User
+                <Button 
+                  onClick={handleUpdateUser} 
+                  className="w-full"
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? 'Updating...' : 'Update User'}
                 </Button>
               </div>
             )}

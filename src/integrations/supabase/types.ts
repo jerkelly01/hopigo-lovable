@@ -78,6 +78,45 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       bills: {
         Row: {
           amount: number
@@ -959,6 +998,13 @@ export type Database = {
         Args: { user_id: string; role_name: string }
         Returns: undefined
       }
+      get_user_roles: {
+        Args: { target_user_id?: string }
+        Returns: {
+          role_name: string
+          role_description: string
+        }[]
+      }
       has_role: {
         Args: { role_name: string }
         Returns: boolean
@@ -966,6 +1012,21 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      safe_assign_role: {
+        Args: { target_user_id: string; role_name: string }
+        Returns: undefined
+      }
+      safe_update_user: {
+        Args: {
+          target_user_id: string
+          full_name_param?: string
+          name_param?: string
+          is_verified_param?: boolean
+          is_active_param?: boolean
+          user_type_param?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

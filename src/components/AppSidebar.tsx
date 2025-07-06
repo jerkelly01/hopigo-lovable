@@ -104,6 +104,11 @@ const settingsItems = [{
   icon: Shield,
   description: 'User roles'
 }, {
+  title: 'Security Audit',
+  url: '/audit',
+  icon: FileText,
+  description: 'Security audit logs'
+}, {
   title: 'Database',
   url: '/database',
   icon: Database,
