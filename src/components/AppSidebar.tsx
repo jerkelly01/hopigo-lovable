@@ -180,9 +180,11 @@ const settingsItems = [
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const { signOut } = useAuthContext();
+  
+  const isCollapsed = state === 'collapsed';
   
   const isActive = (path: string) => {
     if (path === '/') {
@@ -217,7 +219,7 @@ export function AppSidebar() {
               >
                 <NavLink to={item.url} className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200">
                   <item.icon className="h-5 w-5 shrink-0 text-blue-600" />
-                  {!collapsed && (
+                  {!isCollapsed && (
                     <div className="flex flex-col min-w-0">
                       <span className="text-sm font-medium truncate">{item.title}</span>
                       <span className="text-xs text-gray-500 truncate">{item.description}</span>
@@ -239,7 +241,7 @@ export function AppSidebar() {
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <Shield className="h-5 w-5 text-white" />
           </div>
-          {!collapsed && (
+          {!isCollapsed && (
             <div>
               <h2 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 HopiGo Admin
@@ -266,7 +268,7 @@ export function AppSidebar() {
           className="w-full justify-start gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
         >
           <LogOut className="h-4 w-4" />
-          {!collapsed && <span>Sign Out</span>}
+          {!isCollapsed && <span>Sign Out</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>
