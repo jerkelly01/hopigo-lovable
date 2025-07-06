@@ -3,9 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider, useAuthContext } from '@/components/AuthProvider';
 import AuthPage from '@/pages/Auth';
-import Index from '@/pages/Index';
-import Marketplace from '@/pages/Marketplace';
-import Wallet from '@/pages/Wallet';
+import AdminDashboard from '@/pages/AdminDashboard';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -29,31 +27,7 @@ function App() {
               path="/" 
               element={
                 <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/marketplace" 
-              element={
-                <ProtectedRoute>
-                  <Marketplace />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/services" 
-              element={
-                <ProtectedRoute>
-                  <Marketplace />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/wallet" 
-              element={
-                <ProtectedRoute>
-                  <Wallet />
+                  <AdminDashboard />
                 </ProtectedRoute>
               } 
             />

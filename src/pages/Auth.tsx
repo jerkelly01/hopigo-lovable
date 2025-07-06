@@ -1,272 +1,234 @@
 
-import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuthContext } from '@/components/AuthProvider';
-import { Loader2, Mail, Lock, User, Globe } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Shield } from 'lucide-react';
 
 export default function AuthPage() {
-  const { user, loading, signIn, signUp, resetPassword } = useAuthContext();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const { user, signIn, signUp, loading } = useAuthContext();
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: ''
+  });
+  const [errors, setErrors] = useState<string>('');
 
-  // Redirect if already authenticated
-  if (user && !loading) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    const { error } = await signIn(email, password);
-    
-    if (error) {
-      setError(error.message);
+  useEffect(() => {
+    if (user) {
+      navigate('/');
     }
-    
-    setIsLoading(false);
+  }, [user, navigate]);
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors('');
+
+    const { error } = await signIn(formData.email, formData.password);
+    if (error) {
+      setErrors(error);
+    }
   };
 
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+    setErrors('');
 
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      setIsLoading(false);
-      return;
-    }
-
-    const { error } = await signUp(email, password, { name });
+    const { error } = await signUp(formData.email, formData.password, {
+      name: formData.name
+    });
     
     if (error) {
-      setError(error.message);
+      setErrors(error);
     } else {
-      setSuccess('Account created! Please check your email to verify your account.');
+      setErrors('');
+      // Show success message or redirect
     }
-    
-    setIsLoading(false);
   };
 
-  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('resetEmail') as string;
-
-    const { error } = await resetPassword(email);
-    
-    if (error) {
-      setError(error.message);
-    } else {
-      setResetEmailSent(true);
-      setSuccess('Password reset email sent! Please check your inbox.');
-    }
-    
-    setIsLoading(false);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome to HopiGo</CardTitle>
-          <CardDescription>Your all-in-one service marketplace</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <Shield className="h-12 w-12 text-blue-600" />
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            HopiGo Admin
+          </h1>
+          <p className="text-gray-600 mt-2">Access your admin dashboard</p>
+        </div>
 
-            <TabsContent value="signin" className="space-y-4">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="signin">
+            <Card>
+              <CardHeader>
+                <CardTitle>Sign In</CardTitle>
+                <CardDescription>
+                  Enter your credentials to access the admin dashboard
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
                     <Input
+                      id="signin-email"
                       name="email"
                       type="email"
-                      placeholder="Email"
-                      className="pl-10"
+                      placeholder="admin@hopigo.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      name="password"
-                      type="password"
-                      placeholder="Password"
-                      className="pl-10"
-                      required
-                    />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="signin-password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
 
-                {success && (
-                  <Alert>
-                    <AlertDescription>{success}</AlertDescription>
-                  </Alert>
-                )}
+                  {errors && (
+                    <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                      {errors}
+                    </div>
+                  )}
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
-                </Button>
-
-                <div className="text-center">
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="text-sm"
-                    onClick={() => {
-                      setError(null);
-                      setSuccess(null);
-                    }}
-                  >
-                    Forgot password?
-                  </Button>
-                </div>
-              </form>
-
-              {/* Forgot Password Form */}
-              <div className="border-t pt-4">
-                <form onSubmit={handleResetPassword} className="space-y-4">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      name="resetEmail"
-                      type="email"
-                      placeholder="Enter email for password reset"
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" variant="outline" className="w-full" disabled={isLoading || resetEmailSent}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {resetEmailSent ? 'Email Sent' : 'Reset Password'}
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </form>
-              </div>
-            </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <TabsContent value="signup">
+            <Card>
+              <CardHeader>
+                <CardTitle>Create Admin Account</CardTitle>
+                <CardDescription>
+                  Create a new admin account for the platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Full Name</Label>
                     <Input
+                      id="signup-name"
                       name="name"
                       type="text"
-                      placeholder="Full Name"
-                      className="pl-10"
+                      placeholder="Your full name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
                     <Input
+                      id="signup-email"
                       name="email"
                       type="email"
-                      placeholder="Email"
-                      className="pl-10"
+                      placeholder="admin@hopigo.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       required
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      name="password"
-                      type="password"
-                      placeholder="Password (min. 6 characters)"
-                      className="pl-10"
-                      required
-                    />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="signup-password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create a password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                        minLength={6}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      name="confirmPassword"
-                      type="password"
-                      placeholder="Confirm Password"
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
 
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+                  {errors && (
+                    <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                      {errors}
+                    </div>
+                  )}
 
-                {success && (
-                  <Alert>
-                    <AlertDescription>{success}</AlertDescription>
-                  </Alert>
-                )}
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? 'Creating Account...' : 'Create Account'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Account
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+        {/* Demo Note */}
+        <div className="mt-6 text-center text-sm text-gray-500">
+          <p>Demo Mode: Authentication is optional for preview</p>
+        </div>
+      </div>
     </div>
   );
 }
