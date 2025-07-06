@@ -78,11 +78,20 @@ export default function AuditPage() {
 
       if (usersError) throw usersError;
 
-      // Combine data
-      const enrichedLogs = logsData?.map(log => {
+      // Combine data with proper type casting
+      const enrichedLogs: AuditLog[] = logsData?.map(log => {
         const user = usersData?.find(u => u.id === log.user_id);
         return {
-          ...log,
+          id: log.id,
+          user_id: log.user_id,
+          action: log.action,
+          table_name: log.table_name,
+          record_id: log.record_id,
+          old_values: log.old_values,
+          new_values: log.new_values,
+          ip_address: log.ip_address ? String(log.ip_address) : null,
+          user_agent: log.user_agent,
+          created_at: log.created_at || new Date().toISOString(),
           user_email: user?.email,
           user_name: user?.full_name || user?.name
         };
