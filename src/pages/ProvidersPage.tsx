@@ -114,36 +114,15 @@ export default function ProvidersPage() {
   };
 
   const fetchCategories = async () => {
-    try {
-      // Try to fetch from service_categories table first
-      const { data, error } = await supabase
-        .from('service_categories' as any)
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order');
+    // Use hardcoded categories since service_categories table may not exist yet
+    const defaultCategories: ServiceCategory[] = [
+      { id: '1', name: 'Cleaning', description: 'Home and office cleaning services', icon_name: 'Sparkles', is_active: true, sort_order: 1, created_at: new Date().toISOString() },
+      { id: '2', name: 'Handyman', description: 'General repair and maintenance', icon_name: 'Wrench', is_active: true, sort_order: 2, created_at: new Date().toISOString() },
+      { id: '3', name: 'Landscaping', description: 'Garden and lawn care services', icon_name: 'Trees', is_active: true, sort_order: 3, created_at: new Date().toISOString() },
+      { id: '4', name: 'Beauty', description: 'Beauty and wellness services', icon_name: 'Scissors', is_active: true, sort_order: 4, created_at: new Date().toISOString() },
+    ];
 
-      if (error) {
-        console.error('Error fetching categories:', error);
-        // Fallback to hardcoded categories if table doesn't exist yet
-        setCategories([
-          { id: '1', name: 'Cleaning', description: 'Home and office cleaning services', icon_name: 'Sparkles', is_active: true, sort_order: 1, created_at: new Date().toISOString() },
-          { id: '2', name: 'Handyman', description: 'General repair and maintenance', icon_name: 'Wrench', is_active: true, sort_order: 2, created_at: new Date().toISOString() },
-          { id: '3', name: 'Landscaping', description: 'Garden and lawn care services', icon_name: 'Trees', is_active: true, sort_order: 3, created_at: new Date().toISOString() },
-          { id: '4', name: 'Beauty', description: 'Beauty and wellness services', icon_name: 'Scissors', is_active: true, sort_order: 4, created_at: new Date().toISOString() },
-        ]);
-      } else {
-        setCategories(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      // Use default categories
-      setCategories([
-        { id: '1', name: 'Cleaning', description: 'Home and office cleaning services', icon_name: 'Sparkles', is_active: true, sort_order: 1, created_at: new Date().toISOString() },
-        { id: '2', name: 'Handyman', description: 'General repair and maintenance', icon_name: 'Wrench', is_active: true, sort_order: 2, created_at: new Date().toISOString() },
-        { id: '3', name: 'Landscaping', description: 'Garden and lawn care services', icon_name: 'Trees', is_active: true, sort_order: 3, created_at: new Date().toISOString() },
-        { id: '4', name: 'Beauty', description: 'Beauty and wellness services', icon_name: 'Scissors', is_active: true, sort_order: 4, created_at: new Date().toISOString() },
-      ]);
-    }
+    setCategories(defaultCategories);
   };
 
   const handleEditProvider = (provider: ProviderWithUser) => {
