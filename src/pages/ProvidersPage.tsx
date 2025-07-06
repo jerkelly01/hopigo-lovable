@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,17 +17,7 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type ServiceProvider = Tables<'service_providers'>;
 type User = Tables<'users'>;
-
-// Define a simple category type since service_categories table types aren't available yet
-interface ServiceCategory {
-  id: string;
-  name: string;
-  description?: string;
-  icon_name?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-}
+type ServiceCategory = Tables<'service_categories'>;
 
 interface ProviderWithUser extends ServiceProvider {
   user?: User;
@@ -81,29 +70,22 @@ export default function ProvidersPage() {
 
   const fetchProviders = async () => {
     try {
-      // First get service providers
+      // Fetch service providers with user data in a single query
       const { data: providersData, error: providersError } = await supabase
         .from('service_providers')
-        .select('*')
+        .select(`
+          *,
+          users!service_providers_user_id_fkey (*)
+        `)
         .order('created_at', { ascending: false });
 
       if (providersError) throw providersError;
 
-      // Then get users for each provider
-      const providersWithUsers = await Promise.all(
-        (providersData || []).map(async (provider) => {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', provider.user_id)
-            .single();
-
-          return {
-            ...provider,
-            user: userData
-          };
-        })
-      );
+      // Transform the data to match our interface
+      const providersWithUsers = (providersData || []).map(provider => ({
+        ...provider,
+        user: provider.users
+      }));
 
       setProviders(providersWithUsers);
     } catch (error) {
@@ -116,15 +98,16 @@ export default function ProvidersPage() {
 
   const fetchCategories = async () => {
     try {
-      // Try to fetch from service_categories table, but handle if it doesn't exist yet
+      // Fetch from service_categories table
       const { data, error } = await supabase
-        .rpc('sql', { 
-          query: 'SELECT * FROM service_categories WHERE is_active = true ORDER BY sort_order' 
-        }) as any;
+        .from('service_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
 
       if (error) {
-        // Fallback to hardcoded categories if table doesn't exist
-        console.log('Service categories table not ready, using defaults');
+        console.error('Error fetching categories:', error);
+        // Fallback to hardcoded categories if table doesn't exist yet
         setCategories([
           { id: '1', name: 'Cleaning', description: 'Home and office cleaning services', icon_name: 'Sparkles', is_active: true, sort_order: 1, created_at: new Date().toISOString() },
           { id: '2', name: 'Handyman', description: 'General repair and maintenance', icon_name: 'Wrench', is_active: true, sort_order: 2, created_at: new Date().toISOString() },
