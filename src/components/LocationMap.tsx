@@ -6,11 +6,15 @@ interface Location {
   id: string;
   name: string;
   address: string;
-  latitude: number;
-  longitude: number;
-  coverage_radius?: number;
+  latitude: number | null;
+  longitude: number | null;
+  coverage_radius?: number | null;
   location_type: string;
   is_active: boolean;
+  service_categories: string[];
+  notes?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface LocationMapProps {

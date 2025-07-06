@@ -24,11 +24,11 @@ interface Location {
   id: string;
   name: string;
   address: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   location_type: string;
   is_active: boolean;
-  coverage_radius?: number;
+  coverage_radius?: number | null;
   service_categories: string[];
   notes?: string;
   created_at: string;
