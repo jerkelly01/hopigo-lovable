@@ -24,7 +24,7 @@ export default function DatabasePage() {
     'notifications', 'bills', 'fuel_payments', 'donations',
     'split_bills', 'loyalty_transactions', 'activities', 'locations',
     'service_zones', 'roles', 'user_roles'
-  ];
+  ] as const;
 
   useEffect(() => {
     fetchDatabaseStats();
@@ -36,7 +36,7 @@ export default function DatabasePage() {
         tableNames.map(async (tableName) => {
           try {
             const { count, error } = await supabase
-              .from(tableName)
+              .from(tableName as any)
               .select('*', { count: 'exact', head: true });
             
             return {
