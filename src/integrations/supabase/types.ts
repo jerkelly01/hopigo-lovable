@@ -37,15 +37,7 @@ export type Database = {
           type?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "activities_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       advertisements: {
         Row: {
@@ -120,15 +112,7 @@ export type Database = {
           status?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "bills_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       donations: {
         Row: {
@@ -158,15 +142,7 @@ export type Database = {
           message?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "donations_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       event_tickets: {
         Row: {
@@ -199,13 +175,6 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_tickets_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -283,15 +252,7 @@ export type Database = {
           station_name?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "fuel_payments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       loyalty_programs: {
         Row: {
@@ -351,15 +312,7 @@ export type Database = {
           transaction_type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "loyalty_transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       money_transfers: {
         Row: {
@@ -389,22 +342,7 @@ export type Database = {
           sender_id?: string
           status?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "money_transfers_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "money_transfers_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -434,15 +372,7 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       payments: {
         Row: {
@@ -478,15 +408,7 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "payments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       ride_bookings: {
         Row: {
@@ -529,13 +451,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "ride_bookings_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "ride_bookings_driver_id_fkey"
             columns: ["driver_id"]
@@ -591,15 +506,7 @@ export type Database = {
           vehicle_model?: string
           vehicle_type?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "ride_drivers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       roles: {
         Row: {
@@ -657,13 +564,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "service_bookings_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "service_bookings_provider_id_fkey"
             columns: ["provider_id"]
@@ -723,15 +623,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_providers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       services: {
         Row: {
@@ -808,15 +700,7 @@ export type Database = {
           title?: string
           total_amount?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "split_bills_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       User: {
         Row: {
@@ -870,49 +754,85 @@ export type Database = {
       }
       users: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          bio: string | null
           created_at: string | null
+          currency: string | null
+          dob: string | null
           email: string
           full_name: string | null
           id: string
           is_active: boolean | null
+          is_service_provider: boolean | null
+          is_verified: boolean | null
+          language: string | null
           last_login: string | null
+          last_login_at: string | null
           loyalty_points: number | null
+          name: string | null
+          payment_methods: string[] | null
           phone_number: string | null
+          saved_providers: string[] | null
           updated_at: string | null
           user_type: string | null
           verification_status: string | null
           wallet_balance: number | null
+          wallet_id: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
+          currency?: string | null
+          dob?: string | null
           email: string
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          is_service_provider?: boolean | null
+          is_verified?: boolean | null
+          language?: string | null
           last_login?: string | null
+          last_login_at?: string | null
           loyalty_points?: number | null
+          name?: string | null
+          payment_methods?: string[] | null
           phone_number?: string | null
+          saved_providers?: string[] | null
           updated_at?: string | null
           user_type?: string | null
           verification_status?: string | null
           wallet_balance?: number | null
+          wallet_id?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string | null
+          currency?: string | null
+          dob?: string | null
           email?: string
           full_name?: string | null
           id?: string
           is_active?: boolean | null
+          is_service_provider?: boolean | null
+          is_verified?: boolean | null
+          language?: string | null
           last_login?: string | null
+          last_login_at?: string | null
           loyalty_points?: number | null
+          name?: string | null
+          payment_methods?: string[] | null
           phone_number?: string | null
+          saved_providers?: string[] | null
           updated_at?: string | null
           user_type?: string | null
           verification_status?: string | null
           wallet_balance?: number | null
+          wallet_id?: string | null
         }
         Relationships: []
       }
