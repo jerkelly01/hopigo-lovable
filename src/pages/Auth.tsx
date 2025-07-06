@@ -147,6 +147,12 @@ export default function AuthPage() {
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
+
+                  <div className="text-center">
+                    <Button asChild variant="ghost" className="text-sm text-gray-600 hover:text-gray-900">
+                      <a href="/forgot-password">Forgot your password?</a>
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </Card>

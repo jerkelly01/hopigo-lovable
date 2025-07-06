@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Users, ShoppingBag, Car, DollarSign, TrendingUp, Calendar, Bell, Settings, BarChart3, AlertTriangle } from 'lucide-react';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { DashboardSkeleton } from '@/components/LoadingScreen';
 interface DashboardStats {
   totalUsers: number;
   totalProviders: number;
@@ -126,19 +127,16 @@ export default function AdminDashboard() {
     }
   };
   if (loading) {
-    return <SidebarProvider>
+    return (
+      <SidebarProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <SidebarInset>
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading dashboard...</p>
-              </div>
-            </div>
+            <DashboardSkeleton />
           </SidebarInset>
         </div>
-      </SidebarProvider>;
+      </SidebarProvider>
+    );
   }
   return <SidebarProvider>
       <div className="min-h-screen flex w-full">

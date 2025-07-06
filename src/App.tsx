@@ -2,7 +2,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider, useAuthContext } from '@/components/AuthProvider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ThemeProvider } from '@/hooks/useTheme';
 import AuthPage from '@/pages/Auth';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
+import EmailVerificationPage from '@/pages/EmailVerificationPage';
 import AdminDashboard from '@/pages/AdminDashboard';
 import UsersPage from '@/pages/UsersPage';
 import ProvidersPage from '@/pages/ProvidersPage';
@@ -29,20 +33,35 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
   
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
   
-  // Allow access without authentication for preview purposes
+  // Redirect to auth if no user
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+  
   return <>{children}</>;
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-background">
-          <Routes>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light" storageKey="hopigo-ui-theme">
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-background">
+              <Routes>
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/verify-email" element={<EmailVerificationPage />} />
             <Route 
               path="/" 
               element={
@@ -212,11 +231,13 @@ function App() {
               } 
             />
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Toaster />
-        </div>
-      </Router>
-    </AuthProvider>
+            </Routes>
+            <Toaster />
+          </div>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 
