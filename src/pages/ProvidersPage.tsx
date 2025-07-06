@@ -17,17 +17,7 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type ServiceProvider = Tables<'service_providers'>;
 type User = Tables<'users'>;
-
-// Define ServiceCategory interface since it's not in types yet
-interface ServiceCategory {
-  id: string;
-  name: string;
-  description?: string;
-  icon_name?: string;
-  is_active: boolean;
-  sort_order: number;
-  created_at: string;
-}
+type ServiceCategory = Tables<'service_categories'>;
 
 interface ProviderWithUser extends ServiceProvider {
   user?: User;
@@ -114,15 +104,24 @@ export default function ProvidersPage() {
   };
 
   const fetchCategories = async () => {
-    // Use hardcoded categories since service_categories table may not exist yet
-    const defaultCategories: ServiceCategory[] = [
-      { id: '1', name: 'Cleaning', description: 'Home and office cleaning services', icon_name: 'Sparkles', is_active: true, sort_order: 1, created_at: new Date().toISOString() },
-      { id: '2', name: 'Handyman', description: 'General repair and maintenance', icon_name: 'Wrench', is_active: true, sort_order: 2, created_at: new Date().toISOString() },
-      { id: '3', name: 'Landscaping', description: 'Garden and lawn care services', icon_name: 'Trees', is_active: true, sort_order: 3, created_at: new Date().toISOString() },
-      { id: '4', name: 'Beauty', description: 'Beauty and wellness services', icon_name: 'Scissors', is_active: true, sort_order: 4, created_at: new Date().toISOString() },
-    ];
+    try {
+      const { data, error } = await supabase
+        .from('service_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
 
-    setCategories(defaultCategories);
+      if (error) {
+        console.error('Error fetching categories:', error);
+        toast.error('Failed to load categories');
+        return;
+      }
+
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('Failed to load categories');
+    }
   };
 
   const handleEditProvider = (provider: ProviderWithUser) => {
