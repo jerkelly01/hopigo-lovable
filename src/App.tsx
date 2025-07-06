@@ -28,6 +28,7 @@ import SettingsPage from '@/pages/SettingsPage';
 import RolesPage from '@/pages/RolesPage';
 import DatabasePage from '@/pages/DatabasePage';
 import LocationsPage from '@/pages/LocationsPage';
+import FilesPage from '@/pages/FilesPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -227,6 +228,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <LocationsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/files" 
+              element={
+                <ProtectedRoute>
+                  <FilesPage />
                 </ProtectedRoute>
               } 
             />

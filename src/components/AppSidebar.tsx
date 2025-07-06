@@ -104,6 +104,11 @@ const settingsItems = [{
   icon: Shield,
   description: 'User roles'
 }, {
+  title: 'File Management',
+  url: '/files',
+  icon: FileText,
+  description: 'Upload & manage files'
+}, {
   title: 'Security Audit',
   url: '/audit',
   icon: FileText,
