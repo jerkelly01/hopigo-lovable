@@ -254,6 +254,51 @@ export type Database = {
         }
         Relationships: []
       }
+      locations: {
+        Row: {
+          address: string
+          coverage_radius: number | null
+          created_at: string
+          id: string
+          is_active: boolean
+          latitude: number | null
+          location_type: string
+          longitude: number | null
+          name: string
+          notes: string | null
+          service_categories: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          coverage_radius?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          location_type?: string
+          longitude?: number | null
+          name: string
+          notes?: string | null
+          service_categories?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          coverage_radius?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          location_type?: string
+          longitude?: number | null
+          name?: string
+          notes?: string | null
+          service_categories?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       loyalty_programs: {
         Row: {
           created_at: string | null
@@ -622,6 +667,42 @@ export type Database = {
           total_earnings?: number | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      service_zones: {
+        Row: {
+          boundary_coordinates: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          priority: number | null
+          updated_at: string
+          zone_type: string
+        }
+        Insert: {
+          boundary_coordinates: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          priority?: number | null
+          updated_at?: string
+          zone_type?: string
+        }
+        Update: {
+          boundary_coordinates?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority?: number | null
+          updated_at?: string
+          zone_type?: string
         }
         Relationships: []
       }
