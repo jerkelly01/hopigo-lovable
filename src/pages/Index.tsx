@@ -3,12 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuthContext } from '@/components/AuthProvider';
 import { LogOut, User, Wallet, MapPin, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Index() {
   const { user, signOut } = useAuthContext();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
+  };
+
+  const handleAuthAction = () => {
+    navigate('/auth');
   };
 
   return (
@@ -21,11 +27,19 @@ export default function Index() {
               <h1 className="text-2xl font-bold text-indigo-600">HopiGo</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
-              <Button onClick={handleSignOut} variant="outline" size="sm">
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
+              {user ? (
+                <>
+                  <span className="text-sm text-gray-600">Welcome, {user?.email}</span>
+                  <Button onClick={handleSignOut} variant="outline" size="sm">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={handleAuthAction} variant="outline" size="sm">
+                  Sign In / Sign Up
+                </Button>
+              )}
             </div>
           </div>
         </div>
