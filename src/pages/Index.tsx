@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuthContext } from '@/components/AuthProvider';
-import { LogOut, User, Wallet, MapPin, Bell, Car, Home, Utensils, Wrench, Music, Gift2, CreditCard, Smartphone } from 'lucide-react';
+import { LogOut, User, Wallet, MapPin, Bell, Car, Home, Utensils, Wrench, Music, Gift, CreditCard, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const serviceCategories = [
@@ -45,7 +45,7 @@ const serviceCategories = [
   { 
     title: 'Lifestyle Services', 
     description: 'Beauty, wellness & more', 
-    icon: Gift2, 
+    icon: Gift, 
     color: 'bg-indigo-500',
     route: '/lifestyle'
   },
