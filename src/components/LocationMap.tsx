@@ -1,21 +1,8 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Location {
-  id: string;
-  name: string;
-  address: string;
-  latitude: number | null;
-  longitude: number | null;
-  coverage_radius?: number | null;
-  location_type: string;
-  is_active: boolean;
-  service_categories: string[];
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
+type Location = Tables<'locations'>;
 
 interface LocationMapProps {
   locations: Location[];

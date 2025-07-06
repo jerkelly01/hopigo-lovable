@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,21 +18,9 @@ import { LocationStats } from '@/components/LocationStats';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin, Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Location {
-  id: string;
-  name: string;
-  address: string;
-  latitude: number | null;
-  longitude: number | null;
-  location_type: string;
-  is_active: boolean;
-  coverage_radius?: number | null;
-  service_categories: string[];
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
+type Location = Tables<'locations'>;
 
 export default function LocationsPage() {
   const [locations, setLocations] = useState<Location[]>([]);

@@ -1,21 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Activity, Zap, Users } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Location {
-  id: string;
-  name: string;
-  address: string;
-  latitude: number | null;
-  longitude: number | null;
-  location_type: string;
-  is_active: boolean;
-  coverage_radius?: number | null;
-  service_categories: string[];
-  created_at: string;
-}
+type Location = Tables<'locations'>;
 
 interface LocationStatsProps {
   locations: Location[];

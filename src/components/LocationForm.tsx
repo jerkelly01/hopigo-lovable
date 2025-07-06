@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,23 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface Location {
-  id?: string;
-  name: string;
-  address: string;
-  latitude: number | null;
-  longitude: number | null;
-  location_type: string;
-  is_active: boolean;
-  coverage_radius: number | null;
-  service_categories: string[];
-  notes: string | null;
-}
+type Location = Tables<'locations'>;
 
 interface LocationFormProps {
   location?: Location | null;
-  onSave: (location: Omit<Location, 'id'>) => void;
+  onSave: (location: Omit<Location, 'id' | 'created_at' | 'updated_at'>) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -49,7 +38,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
   onCancel,
   isLoading = false
 }) => {
-  const [formData, setFormData] = useState<Omit<Location, 'id'>>({
+  const [formData, setFormData] = useState<Omit<Location, 'id' | 'created_at' | 'updated_at'>>({
     name: '',
     address: '',
     latitude: null,
