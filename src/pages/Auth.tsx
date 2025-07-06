@@ -60,37 +60,39 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <Shield className="h-12 w-12 text-blue-600" />
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <Shield className="h-8 w-8 text-white" />
+            </div>
           </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             HopiGo Admin
           </h1>
           <p className="text-gray-600 mt-2">Access your admin dashboard</p>
         </div>
 
         <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-white/70 backdrop-blur-sm border-0 shadow-md">
+            <TabsTrigger value="signin" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">Sign In</TabsTrigger>
+            <TabsTrigger value="signup" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">Sign Up</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin">
-            <Card>
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle>Sign In</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-gray-900">Sign In</CardTitle>
+                <CardDescription className="text-gray-600">
                   Enter your credentials to access the admin dashboard
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
+                    <Label htmlFor="signin-email" className="text-gray-700">Email</Label>
                     <Input
                       id="signin-email"
                       name="email"
@@ -99,11 +101,12 @@ export default function AuthPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                    <Label htmlFor="signin-password" className="text-gray-700">Password</Label>
                     <div className="relative">
                       <Input
                         id="signin-password"
@@ -113,6 +116,7 @@ export default function AuthPage() {
                         value={formData.password}
                         onChange={handleInputChange}
                         required
+                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
                       />
                       <Button
                         type="button"
@@ -122,21 +126,25 @@ export default function AuthPage() {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-4 w-4 text-gray-500" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 text-gray-500" />
                         )}
                       </Button>
                     </div>
                   </div>
 
                   {errors && (
-                    <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                    <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">
                       {errors}
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-md" 
+                    disabled={loading}
+                  >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </form>
@@ -145,17 +153,17 @@ export default function AuthPage() {
           </TabsContent>
 
           <TabsContent value="signup">
-            <Card>
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle>Create Admin Account</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-gray-900">Create Admin Account</CardTitle>
+                <CardDescription className="text-gray-600">
                   Create a new admin account for the platform
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name" className="text-gray-700">Full Name</Label>
                     <Input
                       id="signup-name"
                       name="name"
@@ -164,11 +172,12 @@ export default function AuthPage() {
                       value={formData.name}
                       onChange={handleInputChange}
                       required
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email" className="text-gray-700">Email</Label>
                     <Input
                       id="signup-email"
                       name="email"
@@ -177,11 +186,12 @@ export default function AuthPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password" className="text-gray-700">Password</Label>
                     <div className="relative">
                       <Input
                         id="signup-password"
@@ -192,6 +202,7 @@ export default function AuthPage() {
                         onChange={handleInputChange}
                         required
                         minLength={6}
+                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 pr-10"
                       />
                       <Button
                         type="button"
@@ -201,21 +212,25 @@ export default function AuthPage() {
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-4 w-4 text-gray-500" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-4 w-4 text-gray-500" />
                         )}
                       </Button>
                     </div>
                   </div>
 
                   {errors && (
-                    <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                    <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">
                       {errors}
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white border-0 shadow-md" 
+                    disabled={loading}
+                  >
                     {loading ? 'Creating Account...' : 'Create Account'}
                   </Button>
                 </form>
@@ -225,7 +240,7 @@ export default function AuthPage() {
         </Tabs>
 
         {/* Demo Note */}
-        <div className="mt-6 text-center text-sm text-gray-500">
+        <div className="mt-6 text-center text-sm text-gray-500 bg-white/50 backdrop-blur-sm rounded-lg p-3">
           <p>Demo Mode: Authentication is optional for preview</p>
         </div>
       </div>
