@@ -3,32 +3,48 @@ import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { DriverStats } from '@/components/DriverStats';
+import { DriverForm } from '@/components/DriverForm';
 import { supabase } from '@/integrations/supabase/client';
-import { Car, Star, DollarSign, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Car, Star, DollarSign, Users, Plus, Search, Edit, Trash2 } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
 
-interface RideDriver {
-  id: string;
-  user_id: string;
-  vehicle_type: string;
-  vehicle_model: string;
-  license_plate: string;
-  rating: number | null;
-  total_rides: number | null;
-  total_earnings: number | null;
-  is_online: boolean | null;
-  is_verified: boolean | null;
-  is_active: boolean | null;
-  created_at: string | null;
-}
+type RideDriver = Tables<'ride_drivers'>;
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState<RideDriver[]>([]);
+  const [filteredDrivers, setFilteredDrivers] = useState<RideDriver[]>([]);
+  const [selectedDriver, setSelectedDriver] = useState<RideDriver | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingDriver, setEditingDriver] = useState<RideDriver | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchDrivers();
   }, []);
+
+  useEffect(() => {
+    const filtered = drivers.filter(driver =>
+      driver.vehicle_model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      driver.license_plate.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      driver.vehicle_type.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredDrivers(filtered);
+  }, [drivers, searchTerm]);
 
   const fetchDrivers = async () => {
     try {
@@ -41,8 +57,81 @@ export default function DriversPage() {
       setDrivers(data || []);
     } catch (error) {
       console.error('Error fetching drivers:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch drivers',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveDriver = async (driverData: Omit<RideDriver, 'id' | 'created_at' | 'updated_at'>) => {
+    setSaving(true);
+    try {
+      if (editingDriver) {
+        const { error } = await supabase
+          .from('ride_drivers')
+          .update(driverData)
+          .eq('id', editingDriver.id);
+
+        if (error) throw error;
+        toast({
+          title: 'Success',
+          description: 'Driver updated successfully',
+        });
+      } else {
+        const { error } = await supabase
+          .from('ride_drivers')
+          .insert([driverData]);
+
+        if (error) throw error;
+        toast({
+          title: 'Success',
+          description: 'Driver created successfully',
+        });
+      }
+
+      await fetchDrivers();
+      setShowForm(false);
+      setEditingDriver(null);
+    } catch (error) {
+      console.error('Error saving driver:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save driver',
+        variant: 'destructive',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteDriver = async (driverId: string) => {
+    if (!confirm('Are you sure you want to delete this driver?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('ride_drivers')
+        .delete()
+        .eq('id', driverId);
+
+      if (error) throw error;
+      
+      toast({
+        title: 'Success',
+        description: 'Driver deleted successfully',
+      });
+      
+      await fetchDrivers();
+    } catch (error) {
+      console.error('Error deleting driver:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete driver',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -54,126 +143,158 @@ export default function DriversPage() {
         .eq('id', driverId);
 
       if (error) throw error;
-      fetchDrivers();
+      
+      toast({
+        title: 'Success',
+        description: `Driver ${!currentStatus ? 'verified' : 'unverified'} successfully`,
+      });
+      
+      await fetchDrivers();
     } catch (error) {
       console.error('Error updating verification:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update verification status',
+        variant: 'destructive',
+      });
     }
   };
 
-  return (
-    <AdminLayout 
-      title="Taxi Drivers" 
-      description="Manage taxi drivers, their vehicles, and verification status"
-    >
-      <div className="space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-indigo-100">Total Drivers</CardTitle>
-              <Car className="h-4 w-4 text-indigo-100" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{drivers.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-100">Online Now</CardTitle>
-              <Users className="h-4 w-4 text-green-100" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">
-                {drivers.filter(d => d.is_online).length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-100">Verified</CardTitle>
-              <Star className="h-4 w-4 text-purple-100" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">
-                {drivers.filter(d => d.is_verified).length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-emerald-100">Total Earnings</CardTitle>
-              <DollarSign className="h-4 w-4 text-emerald-100" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">
-                AWG {drivers.reduce((sum, d) => sum + (d.total_earnings || 0), 0).toLocaleString()}
-              </div>
-            </CardContent>
-          </Card>
+  if (loading) {
+    return (
+      <AdminLayout title="Driver Management" description="Manage taxi drivers and their vehicles">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading drivers...</div>
         </div>
+      </AdminLayout>
+    );
+  }
 
-        {/* Drivers List */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+  if (showForm) {
+    return (
+      <AdminLayout title="Driver Management" description="Manage taxi drivers and their vehicles">
+        <DriverForm
+          driver={editingDriver}
+          onSave={handleSaveDriver}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingDriver(null);
+          }}
+          isLoading={saving}
+        />
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout title="Driver Management" description="Manage taxi drivers and their vehicles">
+      <div className="space-y-6">
+        <DriverStats drivers={drivers} />
+        
+        <Card>
           <CardHeader>
-            <CardTitle className="text-gray-900">All Taxi Drivers</CardTitle>
-            <CardDescription>Manage driver accounts and verification</CardDescription>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Car className="h-5 w-5" />
+                Drivers ({filteredDrivers.length})
+              </span>
+              <Button onClick={() => setShowForm(true)} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Driver
+              </Button>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="text-center py-8">Loading drivers...</div>
-            ) : (
-              <div className="space-y-4">
-                {drivers.map((driver) => (
-                  <div key={driver.id} className="flex items-center justify-between p-4 rounded-lg border bg-gradient-to-r from-indigo-50 to-purple-50">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                        <Car className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {driver.vehicle_model} - {driver.license_plate}
-                        </h3>
-                        <p className="text-sm text-gray-600">Type: {driver.vehicle_type}</p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search drivers..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              {filteredDrivers.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No drivers found. Click "Add Driver" to create your first driver profile.
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Vehicle</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Rides</TableHead>
+                      <TableHead>Earnings</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDrivers.map((driver) => (
+                      <TableRow key={driver.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{driver.vehicle_model}</div>
+                            <div className="text-sm text-gray-500">{driver.license_plate}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="capitalize">{driver.vehicle_type}</TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3" />
+                            <Star className="h-3 w-3 text-yellow-400" />
                             {driver.rating?.toFixed(1) || '0.0'}
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {driver.total_rides || 0} rides
+                        </TableCell>
+                        <TableCell>{driver.total_rides || 0}</TableCell>
+                        <TableCell>AWG {driver.total_earnings || 0}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Badge variant={driver.is_online ? "default" : "secondary"} className="text-xs">
+                              {driver.is_online ? "Online" : "Offline"}
+                            </Badge>
+                            <Badge variant={driver.is_verified ? "default" : "destructive"} className="text-xs">
+                              {driver.is_verified ? "Verified" : "Unverified"}
+                            </Badge>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-3 w-3" />
-                            AWG {driver.total_earnings || 0}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingDriver(driver);
+                                setShowForm(true);
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant={driver.is_verified ? "destructive" : "default"}
+                              onClick={() => toggleVerification(driver.id, driver.is_verified)}
+                            >
+                              {driver.is_verified ? "Unverify" : "Verify"}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleDeleteDriver(driver.id)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="flex flex-col gap-2">
-                        <Badge variant={driver.is_online ? "default" : "secondary"}>
-                          {driver.is_online ? "Online" : "Offline"}
-                        </Badge>
-                        <Badge variant={driver.is_verified ? "default" : "destructive"}>
-                          {driver.is_verified ? "Verified" : "Unverified"}
-                        </Badge>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant={driver.is_verified ? "destructive" : "default"}
-                        onClick={() => toggleVerification(driver.id, driver.is_verified)}
-                      >
-                        {driver.is_verified ? "Unverify" : "Verify"}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
