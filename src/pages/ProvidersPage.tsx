@@ -17,7 +17,17 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type ServiceProvider = Tables<'service_providers'>;
 type User = Tables<'users'>;
-type ServiceCategory = Tables<'service_categories'>;
+
+// Define ServiceCategory interface since it's not in types yet
+interface ServiceCategory {
+  id: string;
+  name: string;
+  description?: string;
+  icon_name?: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+}
 
 interface ProviderWithUser extends ServiceProvider {
   user?: User;
@@ -70,22 +80,29 @@ export default function ProvidersPage() {
 
   const fetchProviders = async () => {
     try {
-      // Fetch service providers with user data in a single query
+      // Fetch service providers first
       const { data: providersData, error: providersError } = await supabase
         .from('service_providers')
-        .select(`
-          *,
-          users!service_providers_user_id_fkey (*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (providersError) throw providersError;
 
-      // Transform the data to match our interface
-      const providersWithUsers = (providersData || []).map(provider => ({
-        ...provider,
-        user: provider.users
-      }));
+      // Fetch users separately and match them with providers
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('*');
+
+      if (usersError) throw usersError;
+
+      // Combine providers with their user data
+      const providersWithUsers = (providersData || []).map(provider => {
+        const user = usersData?.find(u => u.id === provider.user_id);
+        return {
+          ...provider,
+          user
+        };
+      });
 
       setProviders(providersWithUsers);
     } catch (error) {
@@ -98,9 +115,9 @@ export default function ProvidersPage() {
 
   const fetchCategories = async () => {
     try {
-      // Fetch from service_categories table
+      // Try to fetch from service_categories table first
       const { data, error } = await supabase
-        .from('service_categories')
+        .from('service_categories' as any)
         .select('*')
         .eq('is_active', true)
         .order('sort_order');
