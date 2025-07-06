@@ -4,6 +4,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider, useAuthContext } from '@/components/AuthProvider';
 import AuthPage from '@/pages/Auth';
 import Index from '@/pages/Index';
+import Marketplace from '@/pages/Marketplace';
+import Wallet from '@/pages/Wallet';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -28,6 +30,30 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/marketplace" 
+              element={
+                <ProtectedRoute>
+                  <Marketplace />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/services" 
+              element={
+                <ProtectedRoute>
+                  <Marketplace />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/wallet" 
+              element={
+                <ProtectedRoute>
+                  <Wallet />
                 </ProtectedRoute>
               } 
             />
