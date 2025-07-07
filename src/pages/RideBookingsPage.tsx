@@ -149,7 +149,6 @@ export default function RideBookingsPage() {
                       <TableHead>Route</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Distance</TableHead>
-                      <TableHead>Fare</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Actions</TableHead>
@@ -173,9 +172,6 @@ export default function RideBookingsPage() {
                         <TableCell className="capitalize">{booking.ride_type || 'standard'}</TableCell>
                         <TableCell>
                           {booking.distance_km ? `${booking.distance_km} km` : 'N/A'}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          AWG {booking.fare_amount.toLocaleString()}
                         </TableCell>
                         <TableCell>
                           <Badge variant={getStatusBadgeVariant(booking.status)}>

@@ -228,7 +228,6 @@ export default function DriversPage() {
                       <TableHead>Type</TableHead>
                       <TableHead>Rating</TableHead>
                       <TableHead>Rides</TableHead>
-                      <TableHead>Earnings</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -250,7 +249,6 @@ export default function DriversPage() {
                           </div>
                         </TableCell>
                         <TableCell>{driver.total_rides || 0}</TableCell>
-                        <TableCell>AWG {driver.total_earnings || 0}</TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-1">
                             <Badge variant={driver.is_online ? "default" : "secondary"} className="text-xs">

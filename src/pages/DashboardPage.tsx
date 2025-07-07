@@ -63,7 +63,7 @@ export default function DashboardPage() {
         supabase.from('users').select('wallet_balance, loyalty_points', { count: 'exact' }),
         supabase.from('service_providers').select('rating', { count: 'exact' }),
         supabase.from('service_bookings').select('total_amount', { count: 'exact' }),
-        supabase.from('ride_bookings').select('fare_amount', { count: 'exact' }),
+        supabase.from('ride_bookings').select('id', { count: 'exact' }),
         supabase.from('payments').select('amount'),
         supabase.from('events').select('id', { count: 'exact' }),
         supabase.from('loyalty_programs').select('id', { count: 'exact' }),
@@ -75,9 +75,6 @@ export default function DashboardPage() {
       
       // Calculate revenue from service bookings
       const serviceBookingsRevenue = serviceBookingsResult.data?.reduce((sum, booking) => sum + Number(booking.total_amount), 0) || 0;
-      
-      // Calculate revenue from ride bookings
-      const rideBookingsRevenue = rideBookingsResult.data?.reduce((sum, ride) => sum + Number(ride.fare_amount), 0) || 0;
       
       // Calculate average provider rating
       const providerRatings = providersResult.data?.filter(p => p.rating > 0) || [];
@@ -92,7 +89,7 @@ export default function DashboardPage() {
         totalUsers: usersResult.count || 0,
         totalProviders: providersResult.count || 0,
         totalBookings: (serviceBookingsResult.count || 0) + (rideBookingsResult.count || 0),
-        totalRevenue: paymentsRevenue + serviceBookingsRevenue + rideBookingsRevenue,
+        totalRevenue: paymentsRevenue + serviceBookingsRevenue,
         totalRides: rideBookingsResult.count || 0,
         totalEvents: eventsResult.count || 0,
         totalLoyaltyPrograms: loyaltyProgramsResult.count || 0,

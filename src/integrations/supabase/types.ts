@@ -501,7 +501,6 @@ export type Database = {
           destination: string
           distance_km: number | null
           driver_id: string
-          fare_amount: number
           id: string
           pickup_location: string
           ride_type: string | null
@@ -514,7 +513,6 @@ export type Database = {
           destination: string
           distance_km?: number | null
           driver_id: string
-          fare_amount: number
           id?: string
           pickup_location: string
           ride_type?: string | null
@@ -527,7 +525,6 @@ export type Database = {
           destination?: string
           distance_km?: number | null
           driver_id?: string
-          fare_amount?: number
           id?: string
           pickup_location?: string
           ride_type?: string | null
@@ -553,7 +550,6 @@ export type Database = {
           is_verified: boolean | null
           license_plate: string
           rating: number | null
-          total_earnings: number | null
           total_rides: number | null
           updated_at: string | null
           user_id: string
@@ -568,7 +564,6 @@ export type Database = {
           is_verified?: boolean | null
           license_plate: string
           rating?: number | null
-          total_earnings?: number | null
           total_rides?: number | null
           updated_at?: string | null
           user_id: string
@@ -583,7 +578,6 @@ export type Database = {
           is_verified?: boolean | null
           license_plate?: string
           rating?: number | null
-          total_earnings?: number | null
           total_rides?: number | null
           updated_at?: string | null
           user_id?: string

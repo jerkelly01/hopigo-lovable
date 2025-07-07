@@ -37,7 +37,6 @@ export const DriverForm: React.FC<DriverFormProps> = ({
     license_plate: '',
     rating: 0,
     total_rides: 0,
-    total_earnings: 0,
     is_online: false,
     is_verified: false,
     is_active: true
@@ -52,7 +51,6 @@ export const DriverForm: React.FC<DriverFormProps> = ({
         license_plate: driver.license_plate,
         rating: driver.rating || 0,
         total_rides: driver.total_rides || 0,
-        total_earnings: driver.total_earnings || 0,
         is_online: driver.is_online || false,
         is_verified: driver.is_verified || false,
         is_active: driver.is_active || true
@@ -161,21 +159,6 @@ export const DriverForm: React.FC<DriverFormProps> = ({
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="total_earnings">Total Earnings (AWG)</Label>
-              <Input
-                id="total_earnings"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.total_earnings || ''}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  total_earnings: e.target.value ? parseFloat(e.target.value) : null 
-                }))}
-                placeholder="2500.00"
-              />
-            </div>
           </div>
 
           <div className="flex flex-wrap gap-6">
