@@ -1,22 +1,31 @@
 
 import React, { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
-import { useRoles } from '@/hooks/useRoles';
-import { sanitizeInput, validation, authorize, rateLimiter } from '@/lib/security';
-import { Users, Search, Plus, Edit, Shield, DollarSign, Star, Activity, AlertTriangle } from 'lucide-react';
-import type { Tables } from '@/integrations/supabase/types';
+import { Users, UserCheck, UserX, Download, Plus, Edit, Shield, DollarSign, Activity, AlertTriangle, Search } from 'lucide-react';
 import { toast } from 'sonner';
+import { AvatarUpload } from '@/components/upload/AvatarUpload';
+import { SearchFilter } from '@/components/SearchFilter';
+import { useDataExport } from '@/hooks/useDataExport';
+import { useRoles } from '@/hooks/useRoles';
+import { sanitizeInput, validation, rateLimiter } from '@/lib/security';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import type { Tables } from '@/integrations/supabase/types';
 
 type User = Tables<'users'>;
 type Role = Tables<'roles'>;
@@ -26,12 +35,13 @@ interface UserWithRoles extends User {
 }
 
 export default function UsersPage() {
-  const { isAdmin, loading: rolesLoading, hasRole } = useRoles();
+  const { isAdmin, loading: rolesLoading } = useRoles();
+  const { exportCSV, exporting } = useDataExport();
   const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [rolesList, setRolesList] = useState<Role[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserWithRoles[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<UserWithRoles | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -45,24 +55,45 @@ export default function UsersPage() {
     }
   }, [isAdmin]);
 
+  // Filter users based on search and filters
   useEffect(() => {
-    // Sanitize search term to prevent XSS
-    const cleanSearchTerm = sanitizeInput.text(searchTerm);
-    
-    let filtered = users.filter(user =>
-      user.full_name?.toLowerCase().includes(cleanSearchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(cleanSearchTerm.toLowerCase()) ||
-      user.name?.toLowerCase().includes(cleanSearchTerm.toLowerCase())
-    );
+    let filtered = users;
 
-    if (filterRole !== 'all') {
-      filtered = filtered.filter(user => 
-        user.roles?.some(role => role.name === filterRole)
+    // Apply search
+    if (searchQuery) {
+      const cleanSearchTerm = searchQuery.toLowerCase();
+      filtered = filtered.filter(user =>
+        user.full_name?.toLowerCase().includes(cleanSearchTerm) ||
+        user.email.toLowerCase().includes(cleanSearchTerm) ||
+        user.name?.toLowerCase().includes(cleanSearchTerm)
       );
     }
 
+    // Apply filters
+    if (filters.role && filters.role !== 'all') {
+      filtered = filtered.filter(user => 
+        user.roles?.some(role => role.name === filters.role)
+      );
+    }
+
+    if (filters.status) {
+      if (filters.status === 'active') {
+        filtered = filtered.filter(user => user.is_active);
+      } else if (filters.status === 'inactive') {
+        filtered = filtered.filter(user => !user.is_active);
+      }
+    }
+
+    if (filters.verified) {
+      if (filters.verified === 'verified') {
+        filtered = filtered.filter(user => user.is_verified);
+      } else if (filters.verified === 'unverified') {
+        filtered = filtered.filter(user => !user.is_verified);
+      }
+    }
+
     setFilteredUsers(filtered);
-  }, [users, searchTerm, filterRole]);
+  }, [users, searchQuery, filters]);
 
   const fetchUsers = async () => {
     if (!isAdmin) {
@@ -313,12 +344,12 @@ export default function UsersPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
                     placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
-                 <Select value={filterRole} onValueChange={setFilterRole}>
+                 <Select value={filters.role || 'all'} onValueChange={(value) => setFilters({...filters, role: value})}>
                   <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Filter by role" />
                   </SelectTrigger>

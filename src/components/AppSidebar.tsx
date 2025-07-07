@@ -4,6 +4,8 @@ import { LayoutDashboard, Users, ShoppingBag, Car, Calendar, DollarSign, Bell, S
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar } from '@/components/ui/sidebar';
 import { useAuthContext } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
+import { NotificationBadge } from '@/components/NotificationBadge';
 const mainMenuItems = [{
   title: 'Dashboard',
   url: '/',
@@ -132,6 +134,7 @@ export function AppSidebar() {
   const {
     signOut
   } = useAuthContext();
+  const { unreadCount } = useRealtimeNotifications();
   const isCollapsed = state === 'collapsed';
   const isActive = (path: string) => {
     if (path === '/') {
@@ -154,10 +157,15 @@ export function AppSidebar() {
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map(item => <SidebarMenuItem key={item.title}>
+           {items.map(item => <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild isActive={isActive(item.url)} className="group relative hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-100 data-[active=true]:to-purple-100 data-[active=true]:text-purple-700 data-[active=true]:font-semibold">
                 <NavLink to={item.url} className="flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 my-[3px]">
-                  <item.icon className="h-5 w-5 shrink-0 text-blue-600" />
+                  <div className="relative">
+                    <item.icon className="h-5 w-5 shrink-0 text-blue-600" />
+                    {item.title === 'Notifications' && unreadCount > 0 && (
+                      <NotificationBadge count={unreadCount} />
+                    )}
+                  </div>
                   {!isCollapsed && <div className="flex flex-col min-w-0">
                       <span className="text-sm font-medium truncate">{item.title}</span>
                       <span className="text-xs text-gray-500 truncate">{item.description}</span>
