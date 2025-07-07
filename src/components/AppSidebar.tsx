@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ShoppingBag, Car, Calendar, DollarSign, Bell, Settings, BarChart3, Shield, Gift, CreditCard, MapPin, FileText, UserCheck, AlertTriangle, Globe, Database, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingBag, Car, Calendar, DollarSign, Bell, Settings, BarChart3, Shield, Gift, CreditCard, MapPin, FileText, UserCheck, AlertTriangle, Globe, Database, LogOut, Mail, Activity, HardDrive, Code } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar } from '@/components/ui/sidebar';
 import { useAuthContext } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
@@ -80,6 +80,16 @@ const systemItems = [{
   icon: Bell,
   description: 'System notifications'
 }, {
+  title: 'Email Templates',
+  url: '/email-templates',
+  icon: Mail,
+  description: 'Manage email templates'
+}, {
+  title: 'System Health',
+  url: '/system-health',
+  icon: Activity,
+  description: 'Monitor system health'
+}, {
   title: 'Verification',
   url: '/verification',
   icon: UserCheck,
@@ -108,8 +118,18 @@ const settingsItems = [{
 }, {
   title: 'File Management',
   url: '/files',
-  icon: FileText,
+  icon: HardDrive,
   description: 'Upload & manage files'
+}, {
+  title: 'Backup & Recovery',
+  url: '/backup-recovery',
+  icon: Database,
+  description: 'Database backups'
+}, {
+  title: 'API Documentation',
+  url: '/api-docs',
+  icon: Code,
+  description: 'API reference'
 }, {
   title: 'Security Audit',
   url: '/audit',
