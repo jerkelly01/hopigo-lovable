@@ -29,6 +29,10 @@ import RolesPage from '@/pages/RolesPage';
 import DatabasePage from '@/pages/DatabasePage';
 import LocationsPage from '@/pages/LocationsPage';
 import FilesPage from '@/pages/FilesPage';
+import EmailTemplatesPage from '@/pages/EmailTemplatesPage';
+import SystemHealthPage from '@/pages/SystemHealthPage';
+import BackupRecoveryPage from '@/pages/BackupRecoveryPage';
+import ApiDocsPage from '@/pages/ApiDocsPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -236,6 +240,38 @@ function App() {
               element={
                 <ProtectedRoute>
                   <FilesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/email-templates" 
+              element={
+                <ProtectedRoute>
+                  <EmailTemplatesPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/system-health" 
+              element={
+                <ProtectedRoute>
+                  <SystemHealthPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/backup-recovery" 
+              element={
+                <ProtectedRoute>
+                  <BackupRecoveryPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/api-docs" 
+              element={
+                <ProtectedRoute>
+                  <ApiDocsPage />
                 </ProtectedRoute>
               } 
             />
