@@ -993,6 +993,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_admin_by_email: {
+        Args: { target_email: string }
+        Returns: undefined
+      }
       assign_role: {
         Args: { user_id: string; role_name: string }
         Returns: undefined
