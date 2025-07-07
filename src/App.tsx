@@ -33,6 +33,8 @@ import EmailTemplatesPage from '@/pages/EmailTemplatesPage';
 import SystemHealthPage from '@/pages/SystemHealthPage';
 import BackupRecoveryPage from '@/pages/BackupRecoveryPage';
 import ApiDocsPage from '@/pages/ApiDocsPage';
+import DashboardBuilderPage from '@/pages/DashboardBuilderPage';
+import IntegrationsPage from '@/pages/IntegrationsPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -272,6 +274,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ApiDocsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard-builder" 
+              element={
+                <ProtectedRoute>
+                  <DashboardBuilderPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/integrations" 
+              element={
+                <ProtectedRoute>
+                  <IntegrationsPage />
                 </ProtectedRoute>
               } 
             />
