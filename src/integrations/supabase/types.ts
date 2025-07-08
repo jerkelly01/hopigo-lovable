@@ -158,6 +158,78 @@ export type Database = {
         }
         Relationships: []
       }
+      dashboard_connections: {
+        Row: {
+          api_key: string
+          app_id: string
+          app_name: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_sync: string | null
+          sync_status: string | null
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key: string
+          app_id: string
+          app_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          sync_status?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key?: string
+          app_id?: string
+          app_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_sync?: string | null
+          sync_status?: string | null
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      dashboard_events: {
+        Row: {
+          app_id: string
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          processed: boolean | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          processed?: boolean | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          processed?: boolean | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           amount: number

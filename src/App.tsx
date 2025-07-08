@@ -35,6 +35,7 @@ import BackupRecoveryPage from '@/pages/BackupRecoveryPage';
 import ApiDocsPage from '@/pages/ApiDocsPage';
 import DashboardBuilderPage from '@/pages/DashboardBuilderPage';
 import IntegrationsPage from '@/pages/IntegrationsPage';
+import DashboardConnectionPage from '@/pages/DashboardConnectionPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -290,6 +291,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <IntegrationsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard-connection" 
+              element={
+                <ProtectedRoute>
+                  <DashboardConnectionPage />
                 </ProtectedRoute>
               } 
             />
