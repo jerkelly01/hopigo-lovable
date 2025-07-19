@@ -5,7 +5,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  avatar?: string;
+  avatar_url?: string;
   address?: string;
   dob?: string;
   isServiceProvider: boolean;

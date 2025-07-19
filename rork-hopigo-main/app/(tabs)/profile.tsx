@@ -98,7 +98,7 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <View style={styles.profileInfo}>
           <Image 
-            source={{ uri: user.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3' }} 
+            source={{ uri: user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3' }} 
             style={styles.avatar} 
           />
           <View style={styles.nameContainer}>

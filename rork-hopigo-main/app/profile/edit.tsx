@@ -16,7 +16,7 @@ export default function EditProfileScreen() {
     email: user?.email || '',
     phone: user?.phone || '',
     bio: user?.bio || '',
-    avatar: user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
+    avatar_url: user?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
   });
   
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function EditProfileScreen() {
           email: formData.email,
           phone: formData.phone,
           bio: formData.bio,
-          avatar: formData.avatar
+          avatar_url: formData.avatar_url
         });
       }
       
@@ -99,7 +99,7 @@ export default function EditProfileScreen() {
       <ScrollView style={styles.scrollContent}>
         <View style={styles.avatarContainer}>
           <Image 
-            source={{ uri: formData.avatar }} 
+            source={{ uri: formData.avatar_url }} 
             style={styles.avatar} 
           />
           <TouchableOpacity 
