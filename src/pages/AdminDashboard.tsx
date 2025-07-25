@@ -9,6 +9,7 @@ import { StatsCards } from '@/components/dashboard/StatsCards';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { PendingBookingsAlert } from '@/components/dashboard/PendingBookingsAlert';
+import { LiveChat } from '@/components/LiveChat';
 interface DashboardStats {
   totalUsers: number;
   totalProviders: number;
@@ -148,6 +149,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </SidebarInset>
+        <LiveChat />
       </div>
     </SidebarProvider>;
 }

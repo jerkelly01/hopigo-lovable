@@ -36,6 +36,7 @@ import ApiDocsPage from '@/pages/ApiDocsPage';
 import DashboardBuilderPage from '@/pages/DashboardBuilderPage';
 import IntegrationsPage from '@/pages/IntegrationsPage';
 import DashboardConnectionPage from '@/pages/DashboardConnectionPage';
+import { AgentDashboard } from '@/pages/AgentDashboard';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
@@ -299,6 +300,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DashboardConnectionPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/agent-dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AgentDashboard />
                 </ProtectedRoute>
               } 
             />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ShoppingBag, Car, Calendar, DollarSign, Bell, Settings, BarChart3, Shield, Gift, CreditCard, MapPin, FileText, UserCheck, AlertTriangle, Globe, Database, LogOut, Mail, Activity, HardDrive, Code, PieChart, Zap } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingBag, Car, Calendar, DollarSign, Bell, Settings, BarChart3, Shield, Gift, CreditCard, MapPin, FileText, UserCheck, AlertTriangle, Globe, Database, LogOut, Mail, Activity, HardDrive, Code, PieChart, Zap, MessageSquare } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar } from '@/components/ui/sidebar';
 import { useAuthContext } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,11 @@ const mainMenuItems = [{
   url: '/drivers',
   icon: Car,
   description: 'Manage taxi drivers'
+}, {
+  title: 'Agent Dashboard',
+  url: '/agent-dashboard',
+  icon: MessageSquare,
+  description: 'Customer support chat'
 }];
 const transactionItems = [{
   title: 'Bookings',
