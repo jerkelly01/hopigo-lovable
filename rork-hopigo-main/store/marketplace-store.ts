@@ -317,7 +317,7 @@ export const useMarketplaceStore = create<MarketplaceState>()(
         try {
           // Try to fetch from Supabase first, fallback to mock data
           const { data, error } = await supabase
-            .from('categories')
+            .from('service_categories')
             .select('*')
             .order('name');
           
