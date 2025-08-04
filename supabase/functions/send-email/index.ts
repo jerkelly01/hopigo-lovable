@@ -1,13 +1,66 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+// Initialize Supabase client
+const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Initialize Resend
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
+if (!resendApiKey) {
+  throw new Error("RESEND_API_KEY environment variable is required");
+}
+const resend = new Resend(resendApiKey);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+// Rate limiting store (in-memory for simplicity)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+// Rate limiting function
+function checkRateLimit(identifier: string, maxRequests = 10, windowMs = 3600000): boolean {
+  const now = Date.now();
+  const userLimit = rateLimitStore.get(identifier);
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    rateLimitStore.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (userLimit.count >= maxRequests) {
+    return false;
+  }
+  
+  userLimit.count++;
+  return true;
+}
+
+// Input validation and sanitization
+function validateEmailInput(data: any): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  
+  if (!data.to || typeof data.to !== 'string') {
+    errors.push('Valid email address is required');
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.to)) {
+    errors.push('Invalid email format');
+  }
+  
+  if (!data.template || typeof data.template !== 'string') {
+    errors.push('Template name is required');
+  }
+  
+  if (!data.data || typeof data.data !== 'object') {
+    errors.push('Template data is required');
+  }
+  
+  return { isValid: errors.length === 0, errors };
+}
 
 interface EmailRequest {
   to: string;
@@ -149,11 +202,76 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, template, data }: EmailRequest = await req.json();
-
-    if (!to || !template || !emailTemplates[template as keyof typeof emailTemplates]) {
+    // Get authorization header
+    const authHeader = req.headers.get("authorization");
+    const clientIP = req.headers.get("x-forwarded-for") || "unknown";
+    
+    // Verify authentication (require valid JWT or API key)
+    if (!authHeader) {
       return new Response(
-        JSON.stringify({ error: "Invalid request. Missing to, template, or template not found" }),
+        JSON.stringify({ error: "Authentication required" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Validate JWT token
+    let userId: string | null = null;
+    try {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: "Invalid authentication token" }),
+          {
+            status: 401,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
+      
+      userId = user.id;
+    } catch (authError) {
+      console.error("Authentication error:", authError);
+      return new Response(
+        JSON.stringify({ error: "Authentication failed" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Rate limiting check
+    const rateLimitKey = userId || clientIP;
+    if (!checkRateLimit(rateLimitKey)) {
+      // Log security event
+      await supabase.rpc('log_security_event', {
+        event_type: 'email_rate_limit_exceeded',
+        user_id_param: userId,
+        description_param: `Email rate limit exceeded for ${rateLimitKey}`,
+        metadata_param: { ip: clientIP, user_id: userId }
+      });
+
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        {
+          status: 429,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    const requestData = await req.json();
+    
+    // Validate input
+    const validation = validateEmailInput(requestData);
+    if (!validation.isValid) {
+      return new Response(
+        JSON.stringify({ error: "Validation failed", details: validation.errors }),
         {
           status: 400,
           headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -161,18 +279,55 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    const { to, template, data }: EmailRequest = requestData;
+
+    // Check if template exists
+    if (!emailTemplates[template as keyof typeof emailTemplates]) {
+      return new Response(
+        JSON.stringify({ error: `Template '${template}' not found` }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Sanitize template data to prevent XSS
+    const sanitizedData = Object.keys(data).reduce((acc, key) => {
+      acc[key] = typeof data[key] === 'string' ? data[key].replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') : data[key];
+      return acc;
+    }, {} as Record<string, any>);
+
     const emailTemplate = emailTemplates[template as keyof typeof emailTemplates];
     
+    // Send email using Resend
     const emailResponse = await resend.emails.send({
       from: "HopiGo <noreply@hopigo.com>",
       to: [to],
       subject: emailTemplate.subject,
-      html: emailTemplate.html(data),
+      html: emailTemplate.html(sanitizedData),
+    });
+
+    // Log successful email send
+    await supabase.rpc('log_security_event', {
+      event_type: 'email_sent',
+      user_id_param: userId,
+      description_param: `Email sent successfully: ${template}`,
+      metadata_param: { 
+        template, 
+        recipient: to, 
+        email_id: emailResponse.data?.id,
+        ip: clientIP 
+      }
     });
 
     console.log("Email sent successfully:", emailResponse);
 
-    return new Response(JSON.stringify(emailResponse), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: "Email sent successfully",
+      email_id: emailResponse.data?.id 
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -181,8 +336,20 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error in send-email function:", error);
+    
+    // Log error event
+    try {
+      await supabase.rpc('log_security_event', {
+        event_type: 'email_error',
+        description_param: `Email function error: ${error.message}`,
+        metadata_param: { error: error.message, stack: error.stack }
+      });
+    } catch (logError) {
+      console.error("Failed to log error:", logError);
+    }
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Email service temporarily unavailable" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
