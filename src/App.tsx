@@ -9,17 +9,17 @@ import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
 import EmailVerificationPage from '@/pages/EmailVerificationPage';
 import AdminDashboard from '@/pages/AdminDashboard';
 import UsersPage from '@/pages/UsersPage';
-import ProvidersPage from '@/pages/ProvidersPage';
+import ProvidersPage from '@/pages/ProvidersPageStub';
 import DriversPage from '@/pages/DriversPage';
 import BookingsPage from '@/pages/BookingsPage';
 import RideBookingsPage from '@/pages/RideBookingsPage';
 import PaymentsPage from '@/pages/PaymentsPage';
 import TransfersPage from '@/pages/TransfersPage';
 import ServicesPage from '@/pages/ServicesPage';
-import EventsPage from '@/pages/EventsPage';
+import EventsPage from '@/pages/EventsPageStub';
 import AdvertisementsPage from '@/pages/AdvertisementsPage';
-import LoyaltyPage from '@/pages/LoyaltyPage';
-import AnalyticsPage from '@/pages/AnalyticsPage';
+import LoyaltyPage from '@/pages/LoyaltyPageStub';
+import AnalyticsPage from '@/pages/AnalyticsPageStub';
 import NotificationsPage from '@/pages/NotificationsPage';
 import VerificationPage from '@/pages/VerificationPage';
 import ReportsPage from '@/pages/ReportsPage';
@@ -36,6 +36,7 @@ import ApiDocsPage from '@/pages/ApiDocsPage';
 import DashboardBuilderPage from '@/pages/DashboardBuilderPage';
 import IntegrationsPage from '@/pages/IntegrationsPage';
 import DashboardConnectionPage from '@/pages/DashboardConnectionPage';
+import AuditPage from '@/pages/AuditPage';
 import { AgentDashboard } from '@/pages/AgentDashboard';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -300,6 +301,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <DashboardConnectionPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/audit" 
+              element={
+                <ProtectedRoute>
+                  <AuditPage />
                 </ProtectedRoute>
               } 
             />

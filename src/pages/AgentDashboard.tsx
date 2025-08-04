@@ -87,10 +87,7 @@ export function AgentDashboard() {
     try {
       let query = supabase
         .from('chat_conversations')
-        .select(`
-          *,
-          customer:users!chat_conversations_customer_id_fkey(full_name, avatar_url, email)
-        `)
+        .select('*')
         .order('last_message_at', { ascending: false });
 
       if (activeTab === 'waiting') {
@@ -102,7 +99,14 @@ export function AgentDashboard() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setConversations(data || []);
+      setConversations((data || []).map(conv => ({
+        ...conv,
+        customer: {
+          full_name: 'Customer',
+          email: 'customer@example.com',
+          avatar_url: undefined
+        }
+      })));
     } catch (error) {
       console.error('Error loading conversations:', error);
     }
@@ -112,15 +116,18 @@ export function AgentDashboard() {
     try {
       const { data, error } = await supabase
         .from('chat_messages')
-        .select(`
-          *,
-          sender:users!chat_messages_sender_id_fkey(full_name, avatar_url)
-        `)
+        .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages((data || []).map(msg => ({
+        ...msg,
+        sender: {
+          full_name: 'User',
+          avatar_url: undefined
+        }
+      })));
     } catch (error) {
       console.error('Error loading messages:', error);
     }

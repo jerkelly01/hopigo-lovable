@@ -51,7 +51,7 @@ export function AvatarUpload({
       // Update user's avatar URL in the database
       const { error } = await supabase
         .from('users')
-        .update({ avatar_url: result.url })
+        .update({ avatar: result.url })
         .eq('id', user.id);
 
       if (error) {
@@ -84,7 +84,7 @@ export function AvatarUpload({
       // Update user's avatar URL in the database
       const { error } = await supabase
         .from('users')
-        .update({ avatar_url: null })
+        .update({ avatar: null })
         .eq('id', user.id);
 
       if (error) {

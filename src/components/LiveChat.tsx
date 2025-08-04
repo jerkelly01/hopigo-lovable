@@ -136,14 +136,19 @@ export function LiveChat() {
       const { data, error } = await supabase
         .from('chat_messages')
         .select(`
-          *,
-          sender:users!chat_messages_sender_id_fkey(full_name, avatar_url)
+          *
         `)
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages((data || []).map(msg => ({
+        ...msg,
+        sender: {
+          full_name: 'User',
+          avatar_url: undefined
+        }
+      })));
     } catch (error) {
       console.error('Error loading messages:', error);
     }
