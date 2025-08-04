@@ -21,52 +21,31 @@ export default function AnalyticsPage() {
 
   const fetchAnalyticsData = async () => {
     try {
-      const [usersResult, paymentsResult, servicesResult, bookingsResult] = await Promise.all([
-        supabase.from('users').select('created_at'),
-        supabase.from('payments').select('amount, created_at'),
-        supabase.from('services').select('category, price'),
-        supabase.from('service_bookings').select('total_amount, created_at')
-      ]);
+      // Mock data for analytics demonstration
+      const userGrowth = [
+        { month: 'Jan 2024', users: 150 },
+        { month: 'Feb 2024', users: 180 },
+        { month: 'Mar 2024', users: 220 },
+        { month: 'Apr 2024', users: 250 },
+        { month: 'May 2024', users: 280 },
+        { month: 'Jun 2024', users: 320 }
+      ];
 
-      // Process user growth data
-      const usersByMonth = {};
-      usersResult.data?.forEach(user => {
-        const month = new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        usersByMonth[month] = (usersByMonth[month] || 0) + 1;
-      });
+      const revenueData = [
+        { month: 'Jan 2024', revenue: 5500 },
+        { month: 'Feb 2024', revenue: 6200 },
+        { month: 'Mar 2024', revenue: 7100 },
+        { month: 'Apr 2024', revenue: 7800 },
+        { month: 'May 2024', revenue: 8600 },
+        { month: 'Jun 2024', revenue: 9400 }
+      ];
 
-      const userGrowth = Object.entries(usersByMonth).map(([month, count]) => ({
-        month,
-        users: count
-      }));
-
-      // Process revenue data
-      const revenueByMonth = {};
-      paymentsResult.data?.forEach(payment => {
-        const month = new Date(payment.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        revenueByMonth[month] = (revenueByMonth[month] || 0) + payment.amount;
-      });
-
-      bookingsResult.data?.forEach(booking => {
-        const month = new Date(booking.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-        revenueByMonth[month] = (revenueByMonth[month] || 0) + booking.total_amount;
-      });
-
-      const revenueData = Object.entries(revenueByMonth).map(([month, revenue]) => ({
-        month,
-        revenue
-      }));
-
-      // Process service breakdown
-      const servicesByCategory = {};
-      servicesResult.data?.forEach(service => {
-        servicesByCategory[service.category] = (servicesByCategory[service.category] || 0) + 1;
-      });
-
-      const serviceBreakdown = Object.entries(servicesByCategory).map(([category, count]) => ({
-        name: category,
-        value: count
-      }));
+      const serviceBreakdown = [
+        { name: 'Cleaning', value: 45 },
+        { name: 'Transportation', value: 30 },
+        { name: 'Delivery', value: 15 },
+        { name: 'Other', value: 10 }
+      ];
 
       setAnalyticsData({
         userGrowth: userGrowth.slice(-12),
