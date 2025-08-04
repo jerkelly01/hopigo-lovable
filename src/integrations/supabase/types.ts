@@ -2635,6 +2635,92 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_settings: {
+        Row: {
+          badge_enabled: boolean | null
+          created_at: string | null
+          deal_notifications: Json | null
+          donation_notifications: Json | null
+          event_notifications: Json | null
+          frequency: string | null
+          id: string
+          language: string | null
+          loyalty_notifications: Json | null
+          marketplace_notifications: Json | null
+          payment_notifications: Json | null
+          promotional_notifications: Json | null
+          push_enabled: boolean | null
+          qr_code_notifications: Json | null
+          quiet_hours: Json | null
+          referral_notifications: Json | null
+          sound_enabled: boolean | null
+          subscription_notifications: Json | null
+          system_notifications: Json | null
+          taxi_notifications: Json | null
+          updated_at: string | null
+          user_id: string | null
+          vibration_enabled: boolean | null
+        }
+        Insert: {
+          badge_enabled?: boolean | null
+          created_at?: string | null
+          deal_notifications?: Json | null
+          donation_notifications?: Json | null
+          event_notifications?: Json | null
+          frequency?: string | null
+          id?: string
+          language?: string | null
+          loyalty_notifications?: Json | null
+          marketplace_notifications?: Json | null
+          payment_notifications?: Json | null
+          promotional_notifications?: Json | null
+          push_enabled?: boolean | null
+          qr_code_notifications?: Json | null
+          quiet_hours?: Json | null
+          referral_notifications?: Json | null
+          sound_enabled?: boolean | null
+          subscription_notifications?: Json | null
+          system_notifications?: Json | null
+          taxi_notifications?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          vibration_enabled?: boolean | null
+        }
+        Update: {
+          badge_enabled?: boolean | null
+          created_at?: string | null
+          deal_notifications?: Json | null
+          donation_notifications?: Json | null
+          event_notifications?: Json | null
+          frequency?: string | null
+          id?: string
+          language?: string | null
+          loyalty_notifications?: Json | null
+          marketplace_notifications?: Json | null
+          payment_notifications?: Json | null
+          promotional_notifications?: Json | null
+          push_enabled?: boolean | null
+          qr_code_notifications?: Json | null
+          quiet_hours?: Json | null
+          referral_notifications?: Json | null
+          sound_enabled?: boolean | null
+          subscription_notifications?: Json | null
+          system_notifications?: Json | null
+          taxi_notifications?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+          vibration_enabled?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -5432,6 +5518,15 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          event_type: string
+          user_id_param?: string
+          description_param?: string
+          metadata_param?: Json
+        }
+        Returns: undefined
       }
       mark_messages_as_read: {
         Args: { p_conversation_id: string; p_user_id: string }
