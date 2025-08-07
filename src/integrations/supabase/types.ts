@@ -2416,6 +2416,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string
+          detailed_description: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
@@ -2425,6 +2426,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description: string
+          detailed_description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
@@ -2434,6 +2436,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string
+          detailed_description?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
@@ -2763,6 +2766,39 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_businesses: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          reward_rate: number
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          reward_rate?: number
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          reward_rate?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       payment_intents: {
         Row: {
           amount: number
@@ -3046,6 +3082,36 @@ export type Database = {
           timestamp?: string | null
           unit?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      points_expiry: {
+        Row: {
+          created_at: string | null
+          expiry_date: string
+          id: string
+          is_expired: boolean | null
+          points_amount: number
+          source_transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expiry_date: string
+          id?: string
+          is_expired?: boolean | null
+          points_amount: number
+          source_transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expiry_date?: string
+          id?: string
+          is_expired?: boolean | null
+          points_amount?: number
+          source_transaction_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -3404,6 +3470,39 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_bonuses: {
+        Row: {
+          bonus_points: number
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          referral_code: string
+          referred_id: string | null
+          referrer_id: string
+          status: string | null
+        }
+        Insert: {
+          bonus_points?: number
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code: string
+          referred_id?: string | null
+          referrer_id: string
+          status?: string | null
+        }
+        Update: {
+          bonus_points?: number
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code?: string
+          referred_id?: string | null
+          referrer_id?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       referral_rewards: {
         Row: {
           amount: number
@@ -3613,6 +3712,39 @@ export type Database = {
           size_bytes?: number | null
           timestamp?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      reward_tiers: {
+        Row: {
+          benefits: string[] | null
+          color: string | null
+          created_at: string | null
+          id: string
+          max_points: number | null
+          min_points: number
+          multiplier: number
+          name: string
+        }
+        Insert: {
+          benefits?: string[] | null
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          max_points?: number | null
+          min_points?: number
+          multiplier?: number
+          name: string
+        }
+        Update: {
+          benefits?: string[] | null
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          max_points?: number | null
+          min_points?: number
+          multiplier?: number
+          name?: string
         }
         Relationships: []
       }
@@ -4679,6 +4811,7 @@ export type Database = {
         Row: {
           amount: number
           booking_id: string | null
+          cause_id: string | null
           created_at: string | null
           currency: string | null
           description: string
@@ -4693,6 +4826,7 @@ export type Database = {
         Insert: {
           amount: number
           booking_id?: string | null
+          cause_id?: string | null
           created_at?: string | null
           currency?: string | null
           description: string
@@ -4707,6 +4841,7 @@ export type Database = {
         Update: {
           amount?: number
           booking_id?: string | null
+          cause_id?: string | null
           created_at?: string | null
           currency?: string | null
           description?: string
@@ -4724,6 +4859,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_cause_id_fkey"
+            columns: ["cause_id"]
+            isOneToOne: false
+            referencedRelation: "causes"
             referencedColumns: ["id"]
           },
           {
@@ -5239,6 +5381,39 @@ export type Database = {
           },
         ]
       }
+      user_streaks: {
+        Row: {
+          created_at: string | null
+          current_streak: number | null
+          id: string
+          last_activity_date: string | null
+          longest_streak: number | null
+          streak_type: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number | null
+          streak_type?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_streak?: number | null
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number | null
+          streak_type?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           auto_renew: boolean | null
@@ -5435,6 +5610,10 @@ export type Database = {
         Args: { start_date: string; billing_cycle: string }
         Returns: string
       }
+      calculate_user_tier: {
+        Args: { user_points: number }
+        Returns: string
+      }
       check_fraud_risk: {
         Args: { p_user_id: string; p_action_type: string; p_data: Json }
         Returns: Json
@@ -5442,6 +5621,10 @@ export type Database = {
       clean_expired_cache: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      expire_points: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       generate_daily_analytics_report: {
         Args: Record<PropertyKey, never>
